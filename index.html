@@ -142,230 +142,256 @@
         <!-- ==================== TAB 2: PASS & PLAY REVEAL ==================== -->
         <section id="tab-pass" class="hidden space-y-6 text-center">
             
-            <div class="space-y-1">
-                <span class="px-3 py-1 bg-slate-800 text-slate-400 border border-slate-700 text-xs font-bold rounded-full uppercase tracking-wider">
-                    Pass & Play Phase
-                </span>
-                <h2 id="current-player-title" class="text-3xl font-extrabold text-indigo-400 pt-2">Player 1's Turn</h2>
-                <p class="text-xs text-slate-400">Hand phone to this player. Keep your screen secret!</p>
-            </div>
-
-            <!-- Secret Card Container -->
-            <div class="w-full aspect-[4/5] max-h-[360px] mx-auto relative perspective-1000">
-                <div id="flip-card" class="w-full h-full relative transform-style-3d transition-transform duration-500 rounded-3xl cursor-pointer">
-                    
-                    <!-- Card Front (Hidden State) -->
-                    <div onclick="revealCard()" class="absolute inset-0 w-full h-full bg-slate-900 border-2 border-dashed border-indigo-500/40 rounded-3xl p-6 flex flex-col items-center justify-between backface-hidden shadow-2xl hover:border-indigo-400 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-indigo-950/80 flex items-center justify-center border border-indigo-800/50">
-                            <i data-lucide="lock" class="w-6 h-6 text-indigo-400"></i>
-                        </div>
-                        <div class="space-y-2">
-                            <i data-lucide="eye" class="w-12 h-12 text-indigo-400 mx-auto animate-pulse"></i>
-                            <p class="font-bold text-slate-200 text-lg">Tap or Hold to Reveal</p>
-                            <p class="text-xs text-slate-500">Ensure no one else is looking!</p>
-                        </div>
-                        <div class="text-xs font-semibold text-slate-600 uppercase tracking-widest">
-                            Confidential Role
-                        </div>
-                    </div>
-
-                    <!-- Card Back (Revealed Secret Word / Impostor) -->
-                    <div id="card-back-element" class="absolute inset-0 w-full h-full bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-indigo-500 rounded-3xl p-6 flex flex-col items-center justify-between backface-hidden rotate-y-180 shadow-2xl">
-                        <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                            <i data-lucide="folder" class="w-3.5 h-3.5"></i> Category: <span id="reveal-category" class="text-slate-200 font-bold">Animals</span>
-                        </div>
-
-                        <!-- Role Content -->
-                        <div id="role-content-impostor" class="hidden space-y-3">
-                            <div class="w-16 h-16 rounded-full bg-rose-950/80 border-2 border-rose-500/50 flex items-center justify-center mx-auto text-rose-500 animate-bounce">
-                                <i data-lucide="user-x" class="w-10 h-10"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-rose-500 tracking-wide uppercase">YOU ARE THE IMPOSTOR!</h3>
-                            <p class="text-xs text-slate-400 px-4">You do not know the word. Blend in, listen closely, and pretend you know it!</p>
-                        </div>
-
-                        <div id="role-content-innocent" class="hidden space-y-3">
-                            <div class="w-16 h-16 rounded-full bg-emerald-950/80 border-2 border-emerald-500/50 flex items-center justify-center mx-auto text-emerald-400">
-                                <i data-lucide="check-circle" class="w-10 h-10"></i>
-                            </div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Secret Word:</p>
-                            <h3 id="reveal-word" class="text-3xl font-extrabold text-emerald-400 tracking-wide">ELEPHANT</h3>
-                            <p class="text-xs text-slate-400 px-4">Give subtle clues about this word without making it too easy for the Impostor.</p>
-                        </div>
-
-                        <button onclick="hideCardAndNext()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                            <i data-lucide="eye-off" class="w-4 h-4"></i> Hide & Pass Phone
-                        </button>
-                    </div>
-
+            <!-- Interstitial Pass Screen (Shown between player turns to prevent leaks) -->
+            <div id="pass-interstitial" class="hidden bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6 shadow-2xl my-auto animate-fade-in">
+                <div class="w-20 h-20 rounded-full bg-indigo-950/80 border-2 border-indigo-500/50 flex items-center justify-center mx-auto text-indigo-400">
+                    <i data-lucide="smartphone" class="w-10 h-10 animate-bounce"></i>
                 </div>
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Hand the device to</p>
+                    <h2 id="next-player-pass-name" class="text-3xl font-black text-indigo-400">Player 2</h2>
+                    <p class="text-xs text-slate-500 pt-2">Make sure no one else can see the screen before continuing!</p>
+                </div>
+                <button onclick="confirmNextPlayerReady()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95 text-white font-extrabold text-base rounded-2xl shadow-lg shadow-indigo-500/25 active:scale-98 transition flex items-center justify-center gap-2">
+                    <i data-lucide="user-check" class="w-5 h-5"></i> I am <span id="confirm-player-btn-name">Player 2</span>
+                </button>
             </div>
 
-            <!-- Card Control Button (For non-flip tap) -->
-            <div id="reveal-btn-container" class="pt-2">
-                <button onclick="revealCard()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2">
-                    <i data-lucide="eye" class="w-4 h-4 text-indigo-400"></i> Tap to Reveal Word
-                </button>
+            <!-- Secret Card Reveal Area -->
+            <div id="pass-card-area" class="space-y-6">
+                <div class="space-y-1">
+                    <span class="px-3 py-1 bg-slate-800 text-slate-400 border border-slate-700 text-xs font-bold rounded-full uppercase tracking-wider">
+                        Pass & Play Phase
+                    </span>
+                    <h2 id="current-player-title" class="text-3xl font-extrabold text-indigo-400 pt-2">Player 1's Turn</h2>
+                    <p class="text-xs text-slate-400">Keep your screen secret from other players!</p>
+                </div>
+
+                <!-- Secret Card Container -->
+                <div class="w-full aspect-[4/5] max-h-[360px] mx-auto relative perspective-1000">
+                    <div id="flip-card" class="w-full h-full relative transform-style-3d transition-transform duration-500 rounded-3xl cursor-pointer">
+                        
+                        <!-- Card Front (Hidden State) -->
+                        <div onclick="revealCard()" class="absolute inset-0 w-full h-full bg-slate-900 border-2 border-dashed border-indigo-500/40 rounded-3xl p-6 flex flex-col items-center justify-between backface-hidden shadow-2xl hover:border-indigo-400 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-indigo-950/80 flex items-center justify-center border border-indigo-800/50">
+                                <i data-lucide="lock" class="w-6 h-6 text-indigo-400"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <i data-lucide="eye" class="w-12 h-12 text-indigo-400 mx-auto animate-pulse"></i>
+                                <p class="font-bold text-slate-200 text-lg">Tap to Reveal Role</p>
+                                <p class="text-xs text-slate-500">Ensure no one else is looking!</p>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-600 uppercase tracking-widest">
+                                Confidential Role
+                            </div>
+                        </div>
+
+                        <!-- Card Back (Revealed Secret Word / Impostor) -->
+                        <div id="card-back-element" class="absolute inset-0 w-full h-full bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-indigo-500 rounded-3xl p-6 flex flex-col items-center justify-between backface-hidden rotate-y-180 shadow-2xl">
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                                <i data-lucide="folder" class="w-3.5 h-3.5"></i> Category: <span id="reveal-category" class="text-slate-200 font-bold">---</span>
+                            </div>
+
+                            <!-- Neutral Blank Placeholder for when card is hidden/resetting -->
+                            <div id="role-content-blank" class="hidden space-y-3">
+                                <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-500">
+                                    <i data-lucide="lock" class="w-8 h-8"></i>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hiding Secret...</p>
+                            </div>
+
+                            <!-- Role Content - Impostor -->
+                            <div id="role-content-impostor" class="hidden space-y-3">
+                                <div class="w-16 h-16 rounded-full bg-rose-950/80 border-2 border-rose-500/50 flex items-center justify-center mx-auto text-rose-500 animate-bounce">
+                                    <i data-lucide="user-x" class="w-10 h-10"></i>
+                                </div>
+                                <h3 class="text-2xl font-black text-rose-500 tracking-wide uppercase">YOU ARE THE IMPOSTOR!</h3>
+                                <p class="text-xs text-slate-400 px-4">You do not know the word. Blend in, listen closely, and pretend you know it!</p>
+                            </div>
+
+                            <!-- Role Content - Innocent -->
+                            <div id="role-content-innocent" class="hidden space-y-3">
+                                <div class="w-16 h-16 rounded-full bg-emerald-950/80 border-2 border-emerald-500/50 flex items-center justify-center mx-auto text-emerald-400">
+                                    <i data-lucide="check-circle" class="w-10 h-10"></i>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Secret Word:</p>
+                                <h3 id="reveal-word" class="text-3xl font-extrabold text-emerald-400 tracking-wide">---</h3>
+                                <p class="text-xs text-slate-400 px-4">Give subtle clues about this word without making it too easy for the Impostor.</p>
+                            </div>
+
+                            <button onclick="hideCardAndNext()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                                <i data-lucide="eye-off" class="w-4 h-4"></i> Hide Role & Pass
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Card Control Button -->
+                <div id="reveal-btn-container" class="pt-2">
+                    <button onclick="revealCard()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2">
+                        <i data-lucide="eye" class="w-4 h-4 text-indigo-400"></i> Tap to Reveal Role
+                    </button>
+                </div>
             </div>
         </section>
 
         <!-- ==================== TAB 3: DISCUSSION & VOTING ==================== -->
-        <section id="tab-discussion" class="hidden space-y-6">
+        <section id="tab-discussion" class="hidden space-y-5">
             <div class="text-center space-y-1">
-                <span class="px-3 py-1 bg-amber-950/80 text-amber-400 border border-amber-800/50 text-xs font-bold rounded-full uppercase tracking-wider">
-                    Discussion & Voting
+                <span class="px-3 py-1 bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-bold rounded-full uppercase tracking-wider">
+                    Phase 2: Discussion
                 </span>
-                <h2 class="text-2xl font-bold text-slate-100 pt-2">Find the Impostor!</h2>
-                <p class="text-xs text-slate-400">Take turns giving clues, then vote on who is guilty.</p>
+                <h2 class="text-2xl font-black text-slate-100 pt-1">Find the Impostor!</h2>
             </div>
 
-            <!-- Timer Card -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center space-y-3 shadow-xl">
-                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Discussion Timer</div>
-                <div id="timer-display" class="text-5xl font-black text-indigo-400 font-mono tracking-tight">02:00</div>
-                
-                <div class="flex justify-center gap-2 pt-1">
-                    <button id="timer-toggle-btn" onclick="toggleTimer()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition">
+            <!-- Discussion Timer Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-xl">
+                <div>
+                    <span class="text-xs font-semibold text-slate-400 block">Discussion Timer</span>
+                    <span id="timer-display" class="text-2xl font-black text-slate-100 font-mono">02:00</span>
+                </div>
+                <div class="flex gap-2">
+                    <button id="timer-toggle-btn" onclick="toggleTimer()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5">
                         <i data-lucide="play" class="w-4 h-4"></i> Start Timer
                     </button>
-                    <button onclick="resetTimer()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition border border-slate-700">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+                    <button onclick="resetTimer()" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Player Voting Status List -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> Players in Game
-                </h3>
-                <div id="voting-player-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    <!-- Dynamic List of Players -->
-                </div>
+            <!-- Random Speaking Order List -->
+            <div id="voting-player-list" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+                <!-- Dynamically populated speaking order -->
             </div>
 
-            <!-- Action / Reveal Section -->
-            <div class="space-y-3 pt-2">
-                <button onclick="revealSecretWord()" class="w-full py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2">
-                    <i data-lucide="key" class="w-4 h-4"></i> Reveal Secret Word & Roles
-                </button>
+            <!-- Reveal Secret Button -->
+            <button onclick="revealSecretWord()" class="w-full py-3.5 bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-sm rounded-xl shadow-lg active:scale-98 transition flex items-center justify-center gap-2">
+                <i data-lucide="eye" class="w-4 h-4"></i> Reveal Impostors & Word
+            </button>
 
-                <!-- Revealed Result Box (Hidden initially) -->
-                <div id="reveal-results-box" class="hidden bg-slate-900/90 border-2 border-amber-500/50 rounded-2xl p-4 text-center space-y-3 animate-fade-in">
-                    <div>
-                        <div class="text-xs text-slate-400 uppercase font-semibold">The Secret Word Was:</div>
-                        <div id="result-secret-word" class="text-2xl font-black text-emerald-400 mt-0.5">---</div>
-                    </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <div class="text-xs text-slate-400 uppercase font-semibold mb-1">The Impostor(s):</div>
-                        <div id="result-impostors-list" class="flex flex-wrap justify-center gap-2">
-                            <!-- Populated in JS -->
-                        </div>
+            <!-- Results Display Box -->
+            <div id="reveal-results-box" class="hidden bg-slate-900/90 border-2 border-rose-500/50 rounded-2xl p-4 space-y-3 animate-fade-in">
+                <div class="text-center pb-2 border-b border-slate-800">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Secret Word Was:</span>
+                    <h3 id="result-secret-word" class="text-2xl font-black text-emerald-400">---</h3>
+                </div>
+                <div class="space-y-1.5">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Impostors:</span>
+                    <div id="result-impostors-list" class="flex flex-wrap gap-2">
+                        <!-- Populated dynamic badges -->
                     </div>
                 </div>
 
-                <button onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-base rounded-2xl shadow-lg shadow-indigo-500/20 transition flex items-center justify-center gap-2">
-                    <i data-lucide="rotate-cw" class="w-5 h-5"></i> Next Round
-                </button>
+                <!-- Next Round Actions -->
+                <div class="pt-3 border-t border-slate-800 flex gap-2">
+                    <button onclick="startGame()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-sm rounded-xl shadow-lg active:scale-98 transition flex items-center justify-center gap-2">
+                        <i data-lucide="rotate-cw" class="w-4 h-4"></i> Play Next Round
+                    </button>
+                    <button onclick="switchTab('setup')" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <i data-lucide="settings" class="w-4 h-4"></i> Setup
+                    </button>
+                </div>
             </div>
         </section>
 
-        <!-- ==================== TAB 4: WORD BANK & CUSTOM WORDS ==================== -->
-        <section id="tab-words" class="hidden space-y-6">
+        <!-- ==================== TAB 4: WORD BANK MANAGER ==================== -->
+        <section id="tab-words" class="hidden space-y-5">
             <div class="text-center space-y-1">
-                <h2 class="text-2xl font-bold text-slate-100">Word Bank</h2>
-                <p class="text-xs text-slate-400">Manage categories and add custom word packs</p>
+                <h1 class="text-2xl font-bold text-slate-100">Custom Word Bank</h1>
+                <p class="text-xs text-slate-400">Create custom categories and add your own words</p>
+            </div>
+
+            <!-- Manage Category Box -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Select Category to Edit</label>
+                    <div class="flex gap-2">
+                        <select id="manage-category-select" onchange="renderCategoryWords()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm font-semibold text-slate-200 focus:outline-none">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <button onclick="deleteCurrentCategory()" class="px-3 bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/60 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add New Word Input -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Add Words (Comma-Separated)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-word-input" placeholder="e.g. Pizza, Burger, Taco" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <button onclick="addWordsToCategory()" class="px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Category Word Chips Display -->
+                <div class="space-y-1.5 border-t border-slate-800 pt-3">
+                    <div class="flex justify-between items-center text-xs text-slate-400 font-bold">
+                        <span>Words in Category</span>
+                        <span id="cat-word-count" class="text-indigo-400 font-mono">0</span>
+                    </div>
+                    <div id="category-words-chip-container" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1 bg-slate-950/50 rounded-xl border border-slate-800/60">
+                        <!-- Dynamic word chips -->
+                    </div>
+                </div>
             </div>
 
             <!-- Create New Category -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-xl">
-                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <i data-lucide="folder-plus" class="w-4 h-4 text-indigo-400"></i> Add New Category
-                </h3>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Create New Category</label>
                 <div class="flex gap-2">
-                    <input type="text" id="new-category-name" placeholder="Category Name (e.g., Video Games)" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button onclick="addNewCategory()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
-                        <i data-lucide="plus" class="w-4 h-4"></i> Add
+                    <input type="text" id="new-category-name" placeholder="New Category Name..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <button onclick="addNewCategory()" class="px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs rounded-xl transition whitespace-nowrap">
+                        Create
                     </button>
                 </div>
             </div>
 
-            <!-- Add Words to Selected Category -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-xl">
-                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Add Words to Category
-                </h3>
-                <div class="space-y-2">
-                    <select id="manage-category-select" onchange="renderCategoryWords()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 focus:outline-none">
-                        <!-- Populated dynamically -->
-                    </select>
-                    
-                    <div class="flex gap-2">
-                        <input type="text" id="new-word-input" placeholder="Enter word or comma-separated list..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <button onclick="addWordsToCategory()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Save
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Word List Viewer -->
-                <div class="pt-2 border-t border-slate-800">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Words in Category (<span id="cat-word-count">0</span>)</span>
-                        <button onclick="deleteCurrentCategory()" id="delete-cat-btn" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Category
-                        </button>
-                    </div>
-                    <div id="category-words-chip-container" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1 bg-slate-950/60 rounded-xl border border-slate-800">
-                        <!-- Word Chips dynamic -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reset to Defaults Button -->
-            <button onclick="resetWordPacks()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restore Default Preset Words
+            <button onclick="resetWordPacks()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reset All Word Packs to Default
             </button>
         </section>
 
         <!-- ==================== TAB 5: RULES ==================== -->
-        <section id="tab-rules" class="hidden space-y-5">
+        <section id="tab-rules" class="hidden space-y-4 text-xs text-slate-300">
             <div class="text-center space-y-1">
-                <h2 class="text-2xl font-bold text-slate-100">How to Play</h2>
-                <p class="text-xs text-slate-400">Simple rules for 3+ players</p>
+                <h1 class="text-2xl font-bold text-slate-100">How to Play</h1>
+                <p class="text-xs text-slate-400">Simple rules for 3 to 12 players</p>
             </div>
 
-            <div class="space-y-3">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-3 items-start">
-                    <div class="w-8 h-8 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-800/50 flex items-center justify-center font-bold text-sm shrink-0">1</div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-200">Pass the Phone</h4>
-                        <p class="text-xs text-slate-400 mt-0.5">Each player takes turns looking at the secret card. Everyone receives the same secret word—except the designated Impostor(s).</p>
-                    </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                <div class="space-y-1">
+                    <h3 class="font-bold text-indigo-400 text-sm flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800 flex items-center justify-center text-xs">1</span>
+                        Pass & Play Role Reveal
+                    </h3>
+                    <p class="text-slate-400 leading-relaxed pl-6">
+                        Pass the phone around. Players tap the card privately to reveal their role. Most players see the secret word (Innocents), while the Impostors see only "YOU ARE THE IMPOSTOR".
+                    </p>
                 </div>
 
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-3 items-start">
-                    <div class="w-8 h-8 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-800/50 flex items-center justify-center font-bold text-sm shrink-0">2</div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-200">Give Clues</h4>
-                        <p class="text-xs text-slate-400 mt-0.5">Go in a circle. Each player says ONE word or short phrase describing the secret word. If you are the Impostor, fake it and don't give yourself away!</p>
-                    </div>
+                <div class="space-y-1">
+                    <h3 class="font-bold text-indigo-400 text-sm flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800 flex items-center justify-center text-xs">2</span>
+                        Discussion & Clues
+                    </h3>
+                    <p class="text-slate-400 leading-relaxed pl-6">
+                        Follow the randomized speaking order! Each player says one subtle word or phrase related to the secret word. The Impostors must blend in without knowing the word.
+                    </p>
                 </div>
 
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-3 items-start">
-                    <div class="w-8 h-8 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-800/50 flex items-center justify-center font-bold text-sm shrink-0">3</div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-200">Discuss & Vote</h4>
-                        <p class="text-xs text-slate-400 mt-0.5">When time is up, discuss who seemed suspicious or gave vague clues. Count down 3, 2, 1 and everyone points to who they think is the Impostor!</p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex gap-3 items-start">
-                    <div class="w-8 h-8 rounded-xl bg-rose-950 text-rose-400 border border-rose-800/50 flex items-center justify-center font-bold text-sm shrink-0">4</div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-200">Winning Conditions</h4>
-                        <p class="text-xs text-slate-400 mt-0.5"><strong class="text-slate-200">Innocents Win:</strong> If the majority votes out the Impostor.<br><strong class="text-slate-200">Impostor Wins:</strong> If they avoid detection OR correctly guess the secret word when accused!</p>
-                    </div>
+                <div class="space-y-1">
+                    <h3 class="font-bold text-indigo-400 text-sm flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800 flex items-center justify-center text-xs">3</span>
+                        Vote & Win Conditions
+                    </h3>
+                    <p class="text-slate-400 leading-relaxed pl-6">
+                        After discussion, players vote on who they think the Impostor is. Innocents win if they eliminate all Impostors. Impostors win if they avoid detection or guess the secret word!
+                    </p>
                 </div>
             </div>
         </section>
@@ -381,12 +407,18 @@
     <script>
         // Default Word Packs
         const DEFAULT_WORD_PACKS = {
-            "Animals": ["Elephant", "Penguin", "Giraffe", "Cheetah", "Dolphin", "Kangaroo", "Octopus", "Flamingo", "Chameleon", "Gorilla", "Owl", "Shark", "Panda", "Sloth", "Eagle"],
-            "Food & Drinks": ["Pizza", "Sushi", "Taco", "Hamburger", "Pancakes", "Espresso", "Ice Cream", "Ramen", "Croissant", "Avocado", "Chocolate", "Donut", "Boba Tea", "Spaghetti"],
-            "Places & Travel": ["Airport", "Eiffel Tower", "Beach", "Pyramids", "Camping", "Subway", "Library", "Museum", "Hotel", "Cinema", "Hospital", "Volcano", "Amusement Park"],
-            "Objects & Tech": ["Smartphone", "Headphones", "Laptop", "Telescope", "Bicycle", "Microwave", "Camera", "Drone", "VR Headset", "Guitar", "Umbrella", "Wristwatch"],
-            "Pop Culture & Movies": ["Superhero", "Harry Potter", "Star Wars", "Minecraft", "Pokemon", "Hollywood", "Zombie", "Vampire", "Detective", "Pirate", "Astronaut"]
+            "Best Friend": ["Devank Chabra","Hem","Bhavin", "Chirag", "Vishal", "John Wick", "Shah Rukh Khan","Dwayne Johnson","Kevin Hart","Salman Khan" ],
+            "Footballers": ["Ousmane Dembélé", "Lamine Yamal", "Cristiano Ronaldo", "Mohamed Salah", "Raphinha", "Achraf Hakimi", "Kylian Mbappé", "Messi", "Jude Bellingham"],
+            "Harry Potter": ["Harry Potter", "Hermione Granger", "Ron Weasley", "Albus Dumbledore", "Lord Voldemort", "Severus Snape", "Rubeus Hagrid", "Draco Malfoy", "Sirius Black", "Dobbie"],
+            "Avengers": ["Iron Man", "Captain America", "Thor", "The Hulk", "Black Widow", "Hawkeye", "Spider-Man", "Doctor Strange", "Black Panther", "Scarlet Witch"],
+            "Animals": ["Elephant", "Penguin", "Giraffe", "Cheetah", "Dolphin", "Kangaroo", "Octopus", "Flamingo", "Chameleon", "Gorilla", "Owl", "Shark", "Panda", "Sloth", "Eagle", "Koala", "Leopard", "Peacock", "Walrus", "Platypus"],
+            "Food & Drinks": ["Pizza", "Sushi", "Taco", "Hamburger", "Pancakes", "Espresso", "Ice Cream", "Ramen", "Croissant", "Avocado", "Chocolate", "Donut", "Boba Tea", "Spaghetti", "Lasagna", "Smoothie", "Waffles", "Nachos", "Matcha"],
+            "Places & Travel": ["Airport", "Eiffel Tower", "Beach", "Pyramids", "Camping", "Subway", "Library", "Museum", "Hotel", "Cinema", "Hospital", "Volcano", "Amusement Park", "Taj Mahal", "Colosseum", "National Park", "Space Station"],
+            "Objects & Tech": ["Smartphone", "Headphones", "Laptop", "Telescope", "Bicycle", "Microwave", "Camera", "Drone", "VR Headset", "Guitar", "Umbrella", "Wristwatch", "Smartwatch", "Projector", "3D Printer", "Keyboard"]
         };
+
+        // Track used words per category to avoid repeats
+        let usedWordsHistory = {};
 
         // State Management
         let wordPacks = {};
@@ -398,10 +430,12 @@
             currentRound: {
                 secretWord: "",
                 impostorIndexes: [],
-                currentPlayerIdx: 0,
+                passTurnOrder: [],    // Randomized player turn order for Pass & Play phase
+                currentPassStep: 0,   // Current step in randomized pass turn order
+                currentPlayerIdx: 0,  // Index of current player viewing their card
                 isRevealed: false,
-                randomTurnOrder: [], // Stores shuffled indices for discussion
-                activeTurnIndex: 0   // Current active index in discussion turn order
+                randomTurnOrder: [],  // Stores shuffled indices for discussion
+                activeTurnIndex: 0    // Current active index in discussion turn order
             }
         };
 
@@ -468,10 +502,36 @@
         function resetWordPacks() {
             if (confirm("Reset all categories and custom words back to default presets?")) {
                 wordPacks = JSON.parse(JSON.stringify(DEFAULT_WORD_PACKS));
+                usedWordsHistory = {};
                 saveWordPacks();
                 populateCategoryDropdowns();
                 renderCategoryWords();
             }
+        }
+
+        // Helper to pick a random non-repeated word
+        function getRandomNonRepeatingWord(category) {
+            const availableWords = wordPacks[category] || [];
+            if (availableWords.length === 0) return "";
+
+            if (!usedWordsHistory[category]) {
+                usedWordsHistory[category] = [];
+            }
+
+            // Filter out words that have already been played
+            let unusedWords = availableWords.filter(word => !usedWordsHistory[category].includes(word));
+
+            // If all words in category have been used, reset the history for this category
+            if (unusedWords.length === 0) {
+                usedWordsHistory[category] = [];
+                unusedWords = [...availableWords];
+            }
+
+            // Pick a random word from the unused pool
+            const selectedWord = unusedWords[Math.floor(Math.random() * unusedWords.length)];
+            usedWordsHistory[category].push(selectedWord);
+
+            return selectedWord;
         }
 
         // Setup Controls Logic
@@ -595,10 +655,10 @@
                 return;
             }
 
-            // Pick random word
-            const randomWord = words[Math.floor(Math.random() * words.length)];
+            // Pick random word avoiding recent repeats
+            const randomWord = getRandomNonRepeatingWord(cat);
             
-            // Randomly select Impostors (Fisher-Yates style index picking)
+            // Randomly select Impostors
             const impostorIndexes = [];
             while (impostorIndexes.length < gameState.numImpostors) {
                 const randIdx = Math.floor(Math.random() * gameState.numPlayers);
@@ -607,24 +667,37 @@
                 }
             }
 
-            // Generate randomized speaking order for discussion
-            const turnOrder = Array.from({ length: gameState.numPlayers }, (_, i) => i);
-            for (let i = turnOrder.length - 1; i > 0; i--) {
+            // Shuffle initial Pass & Play reveal order so player 1 isn't always first
+            const passTurnOrder = Array.from({ length: gameState.numPlayers }, (_, i) => i);
+            for (let i = passTurnOrder.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [turnOrder[i], turnOrder[j]] = [turnOrder[j], turnOrder[i]];
+                [passTurnOrder[i], passTurnOrder[j]] = [passTurnOrder[j], passTurnOrder[i]];
+            }
+
+            // Generate randomized speaking order for discussion
+            const discussionTurnOrder = Array.from({ length: gameState.numPlayers }, (_, i) => i);
+            for (let i = discussionTurnOrder.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [discussionTurnOrder[i], discussionTurnOrder[j]] = [discussionTurnOrder[j], discussionTurnOrder[i]];
             }
 
             gameState.currentRound = {
                 secretWord: randomWord,
                 impostorIndexes: impostorIndexes,
-                currentPlayerIdx: 0,
+                passTurnOrder: passTurnOrder,
+                currentPassStep: 0,
+                currentPlayerIdx: passTurnOrder[0],
                 isRevealed: false,
-                randomTurnOrder: turnOrder,
+                randomTurnOrder: discussionTurnOrder,
                 activeTurnIndex: 0
             };
 
             // Setup Pass & Play View
             switchTab('pass');
+            
+            // Start with the first randomized player
+            document.getElementById('pass-interstitial').classList.add('hidden');
+            document.getElementById('pass-card-area').classList.remove('hidden');
             updatePassCardView();
         }
 
@@ -639,12 +712,23 @@
             flipCard.classList.remove('rotate-y-180');
             round.isRevealed = false;
 
-            // Populate Back Info
+            // Immediately clear sensitive info until revealed
+            document.getElementById('role-content-innocent').classList.add('hidden');
+            document.getElementById('role-content-impostor').classList.add('hidden');
+            document.getElementById('role-content-blank').classList.remove('hidden');
+        }
+
+        function revealCard() {
+            const round = gameState.currentRound;
+            const flipCard = document.getElementById('flip-card');
+
+            // Populate sensitive role content right as it flips open
             document.getElementById('reveal-category').innerText = gameState.selectedCategory;
             document.getElementById('reveal-word').innerText = round.secretWord;
 
             const isInnocent = !round.impostorIndexes.includes(round.currentPlayerIdx);
             
+            document.getElementById('role-content-blank').classList.add('hidden');
             if (isInnocent) {
                 document.getElementById('role-content-innocent').classList.remove('hidden');
                 document.getElementById('role-content-impostor').classList.add('hidden');
@@ -652,27 +736,52 @@
                 document.getElementById('role-content-innocent').classList.add('hidden');
                 document.getElementById('role-content-impostor').classList.remove('hidden');
             }
-        }
 
-        function revealCard() {
-            const flipCard = document.getElementById('flip-card');
             flipCard.classList.add('rotate-y-180');
-            gameState.currentRound.isRevealed = true;
+            round.isRevealed = true;
         }
 
         function hideCardAndNext() {
+            const flipCard = document.getElementById('flip-card');
             const round = gameState.currentRound;
-            round.currentPlayerIdx++;
 
-            if (round.currentPlayerIdx < gameState.numPlayers) {
-                updatePassCardView();
+            // 1. Immediately wipe role content BEFORE flipping back or changing screens
+            document.getElementById('role-content-innocent').classList.add('hidden');
+            document.getElementById('role-content-impostor').classList.add('hidden');
+            document.getElementById('role-content-blank').classList.remove('hidden');
+            
+            // 2. Unflip card
+            flipCard.classList.remove('rotate-y-180');
+            round.isRevealed = false;
+
+            round.currentPassStep++;
+
+            if (round.currentPassStep < round.passTurnOrder.length) {
+                // Next player index from randomized passTurnOrder
+                round.currentPlayerIdx = round.passTurnOrder[round.currentPassStep];
+                const nextPlayerName = gameState.playerNames[round.currentPlayerIdx] || `Player ${round.currentPlayerIdx + 1}`;
+                
+                document.getElementById('next-player-pass-name').innerText = nextPlayerName;
+                document.getElementById('confirm-player-btn-name').innerText = nextPlayerName;
+
+                // Hide card area and show transition buffer
+                document.getElementById('pass-card-area').classList.add('hidden');
+                document.getElementById('pass-interstitial').classList.remove('hidden');
             } else {
                 // All players have seen their words -> Start Discussion
                 startDiscussionPhase();
             }
         }
 
+        function confirmNextPlayerReady() {
+            document.getElementById('pass-interstitial').classList.add('hidden');
+            document.getElementById('pass-card-area').classList.remove('hidden');
+            updatePassCardView();
+        }
+
         function startDiscussionPhase() {
+            document.getElementById('pass-interstitial').classList.add('hidden');
+            document.getElementById('pass-card-area').classList.remove('hidden');
             switchTab('discussion');
             resetTimer();
             document.getElementById('reveal-results-box').classList.add('hidden');
